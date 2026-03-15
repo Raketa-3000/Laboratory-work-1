@@ -1,40 +1,226 @@
-﻿namespace BudgetManagement
+﻿using System;
+using System.Windows.Forms;
+public class BudgetForm : Form
 {
-    partial class Form1
+    private BudgetManager budgetManager;
+    private TextBox descriptionTextBox;
+    private TextBox amountTextBox;
+    private ComboBox typeComboBox;
+    private DateTimePicker datePicker;
+    private Button addTransactionButton;
+    private Button removeTransactionButton;
+    private Button updateTransactionButton;
+    private ListBox transactionsListBox;
+    private Label totalBudgetLabel;
+
+    public BudgetForm()
     {
-        /// <summary>
-        /// Обязательная переменная конструктора.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        this.Text = "Управление бюджетом";
+        this.Width = 600;
+        this.Height = 500;
 
-        /// <summary>
-        /// Освободить все используемые ресурсы.
-        /// </summary>
-        /// <param name="disposing">истинно, если управляемый ресурс должен быть удален; иначе ложно.</param>
-        protected override void Dispose(bool disposing)
+        descriptionTextBox = new TextBox
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
+            Location = new System.Drawing.Point(10, 10),
+            Width = 150
+        };
+
+        amountTextBox = new TextBox
+        {
+            Location = new System.Drawing.Point(170, 10),
+            Width = 100
+        };
+
+        typeComboBox = new ComboBox
+        {
+            Location = new System.Drawing.Point(280, 10),
+            Width = 100
+        };
+
+        typeComboBox.Items.Add("Доход");
+        typeComboBox.Items.Add("Расход");
+
+        datePicker = new DateTimePicker
+        {
+            Location = new System.Drawing.Point(390, 10)
+        };
+
+        addTransactionButton = new Button
+        {
+            Location = new System.Drawing.Point(10, 40),
+            Text = "Добавить",
+            Width = 100
+        };
+        addTransactionButton.Click += AddTransactionButton_Click;
+
+        removeTransactionButton = new Button
+        {
+            Location = new System.Drawing.Point(120, 40),
+            Text = "Удалить",
+            Width = 100
+        };
+        removeTransactionButton.Click += RemoveTransactionButton_Click;
+
+        updateTransactionButton = new Button
+        {
+            Location = new System.Drawing.Point(220, 40),
+            Text = "Обновить",
+            Width = 120
+        };
+        updateTransactionButton.Click += UpdateTransactionButton_Click;
+
+        transactionsListBox = new ListBox
+        {
+            Location = new System.Drawing.Point(10, 70),
+            Width = 560,
+            Height = 200
+        };
+
+        totalBudgetLabel = new Label
+        {
+            Location = new System.Drawing.Point(10, 280),
+            Width = 200,
+            Text = "Общий бюджет: "
+        };
+
+        this.Controls.Add(descriptionTextBox);
+        this.Controls.Add(amountTextBox);
+        this.Controls.Add(typeComboBox);
+        this.Controls.Add(datePicker);
+        this.Controls.Add(addTransactionButton);
+        this.Controls.Add(removeTransactionButton);
+        this.Controls.Add(updateTransactionButton);
+        this.Controls.Add(transactionsListBox);
+        this.Controls.Add(totalBudgetLabel);
+
+        budgetManager = new BudgetManager();
+
+        UpdateTransactionsList();
+        UpdateTotalBudget();
+    }
+
+    private void UpdateTransactionsList()
+    {
+        transactionsListBox.Items.Clear();
+
+        foreach (var transaction in budgetManager.Transactions)
+        {
+            string type = transaction.Type == TransactionType.Доход ? "Доход" : "Расход";
+            transactionsListBox.Items.Add($"{transaction.Description} - {transaction.Amount} руб. ({type})");
+        }
+    }
+
+    private void UpdateTotalBudget()
+    {
+        totalBudgetLabel.Text = $"Общий бюджет: {budgetManager.TotalBudget} руб.";
+    }
+
+    private void AddTransactionButton_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(descriptionTextBox.Text) || string.IsNullOrEmpty(amountTextBox.Text))
+        {
+            MessageBox.Show("Заполните все поля!");
+            return;
         }
 
-        #region Код, автоматически созданный конструктором форм Windows
+        decimal amount;
 
-        /// <summary>
-        /// Требуемый метод для поддержки конструктора — не изменяйте 
-        /// содержимое этого метода с помощью редактора кода.
-        /// </summary>
-        private void InitializeComponent()
+        if (!decimal.TryParse(amountTextBox.Text, out amount) || amount < 0)
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            MessageBox.Show("Неверная сумма!");
+            return;
         }
 
-        #endregion
+        TransactionType type = (TransactionType)Enum.Parse(typeof(TransactionType), typeComboBox.SelectedItem.ToString());
+        DateTime date = datePicker.Value;
+
+        Transaction newTransaction = new Transaction(descriptionTextBox.Text, amount, type, date);
+
+
+        try
+        {
+            budgetManager.AddTransaction(newTransaction);
+
+            descriptionTextBox.Clear();
+            amountTextBox.Clear();
+
+            UpdateTransactionsList();
+            UpdateTotalBudget();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
+        }
+    }
+
+    private void RemoveTransactionButton_Click(object sender, EventArgs e)
+    {
+        if (transactionsListBox.SelectedIndex == -1)
+        {
+            MessageBox.Show("Выберите транзакцию для удаления!");
+            return;
+        }
+
+        var transaction = budgetManager.Transactions[transactionsListBox.SelectedIndex];
+
+        try
+        {
+            budgetManager.RemoveTransaction(transaction);
+
+            UpdateTransactionsList();
+            UpdateTotalBudget();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
+        }
+    }
+
+    private void UpdateTransactionButton_Click(object sender, EventArgs e)
+    {
+        if (transactionsListBox.SelectedIndex == -1)
+        {
+            MessageBox.Show("Выберите транзакцию для обновления!");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(descriptionTextBox.Text) || string.IsNullOrEmpty(amountTextBox.Text))
+        {
+            MessageBox.Show("Заполните все поля!");
+            return;
+        }
+
+        decimal newAmount;
+
+        if (!decimal.TryParse(amountTextBox.Text, out newAmount) || newAmount < 0)
+        {
+            MessageBox.Show("Неверная сумма!");
+            return;
+        }
+
+        TransactionType newType = (TransactionType)Enum.Parse(typeof(TransactionType), typeComboBox.SelectedItem.ToString());
+
+        var transaction = budgetManager.Transactions[transactionsListBox.SelectedIndex];
+
+        try
+        {
+            budgetManager.UpdateTransaction(transaction, descriptionTextBox.Text, newAmount, newType);
+
+            UpdateTransactionsList();
+            UpdateTotalBudget();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
+        }
+    }
+
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new BudgetForm());
     }
 }
 
