@@ -16,5 +16,17 @@ namespace BudgetManagement
         {
             InitializeComponent();
         }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // Form1
+            // 
+            this.ClientSize = new System.Drawing.Size(1006, 710);
+            this.Name = "Form1";
+            this.ResumeLayout(false);
+
+        }
     }
 }
