@@ -215,6 +215,7 @@ public class BudgetForm : Form
         }
     }
 
+<<<<<<< Updated upstream
     [STAThread]
     static void Main()
     {
@@ -222,5 +223,7 @@ public class BudgetForm : Form
         Application.SetCompatibleTextRenderingDefault(false);
         Application.Run(new BudgetForm());
     }
+=======
+>>>>>>> Stashed changes
 }
 
