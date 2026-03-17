@@ -214,13 +214,7 @@ public class BudgetForm : Form
             MessageBox.Show(ex.Message);
         }
     }
-    //Error
-    [STAThread]
-    static void Main()
-    {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(new BudgetForm());
-    }
+
+   
 }
 
