@@ -15,7 +15,7 @@ public class BudgetManager
     {
         get
         {
-            return Transactions.Sum(t => t.Type == TransactionType.Доход ? t.Amount : -t.Amount);
+            return Transactions.Sum(t => t.Type == TransactionType.Income ? t.Amount : -t.Amount);
         }
     }
 
@@ -23,6 +23,12 @@ public class BudgetManager
     {
         Transactions = new List<Transaction>();
         LoadTransactions();
+    }
+    public BudgetManager(bool loadFromFile)
+    {
+        Transactions = new List<Transaction>();
+        if (loadFromFile)
+            LoadTransactions();
     }
 
     public void AddTransaction(Transaction transaction)
@@ -59,7 +65,7 @@ public class BudgetManager
         SaveTransactions();
     }
 
-    private void SaveTransactions()
+    protected virtual void SaveTransactions()
     {
         File.WriteAllLines("transactions.txt",
             Transactions.Select(t => $"{t.Description}|{t.Amount}|{(int)t.Type}|{t.Date:yyyy-MM-dd HH:mm:ss}"));

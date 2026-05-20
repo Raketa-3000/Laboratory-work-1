@@ -110,7 +110,7 @@ namespace BudgetManagement
 
             foreach (var transaction in budgetManager.Transactions)
             {
-                string type = transaction.Type == TransactionType.Доход ? "Доход" : "Расход";
+                string type = transaction.Type == TransactionType.Income ? "Доход" : "Расход";
                 transactionsListBox.Items.Add($"{transaction.Description} - {transaction.Amount} руб. ({type})");
             }
         }
@@ -219,9 +219,5 @@ namespace BudgetManagement
                 MessageBox.Show(ex.Message);
             }
         }
-
-<<<<<<< HEAD
-=======
     }
->>>>>>> release/v1.0.0
 }

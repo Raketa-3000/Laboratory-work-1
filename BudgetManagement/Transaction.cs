@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 public enum TransactionType
 {
-    Доход,
-    Расход
+    Income,
+    Expense
 }
 
 public class Transaction
